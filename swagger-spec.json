@@ -20,6 +20,63 @@
             "description": ""
           }
         }
+      },
+      "get": {
+        "operationId": "PermissionsController_getAllPermissions",
+        "parameters": [
+          {
+            "name": "name",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        }
+      },
+      "put": {
+        "operationId": "PermissionsController_updatePermission",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdatePermissionDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        }
+      }
+    },
+    "/permissions/{name}": {
+      "delete": {
+        "operationId": "PermissionsController_deletePermission",
+        "parameters": [
+          {
+            "name": "name",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        }
       }
     }
   },
@@ -43,6 +100,23 @@
         },
         "required": [
           "name"
+        ]
+      },
+      "UpdatePermissionDto": {
+        "type": "object",
+        "properties": {
+          "originalName": {
+            "type": "string",
+            "description": "nombre del permiso a actualizar"
+          },
+          "newName": {
+            "type": "string",
+            "description": "nuevo nombre del permiso"
+          }
+        },
+        "required": [
+          "originalName",
+          "newName"
         ]
       }
     }
