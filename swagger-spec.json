@@ -1,6 +1,28 @@
 {
   "openapi": "3.0.0",
-  "paths": {},
+  "paths": {
+    "/permissions": {
+      "post": {
+        "operationId": "PermissionsController_createPermission",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PermissionDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        }
+      }
+    }
+  },
   "info": {
     "title": "permimssions nest-api",
     "description": "example api mongoDB-mongoose",
@@ -10,6 +32,19 @@
   "tags": [],
   "servers": [],
   "components": {
-    "schemas": {}
+    "schemas": {
+      "PermissionDto": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Nombre del permiso"
+          }
+        },
+        "required": [
+          "name"
+        ]
+      }
+    }
   }
 }

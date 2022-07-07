@@ -8,7 +8,7 @@ export class MongoConnectionService {
 
   constructor(private configService: ConfigService) {
     this.createConnectionDB();
-    // console.log(this.configService.get('mongo'));
+    //console.log(this.configService.get('mongo'));
   }
 
   createConnectionDB(): void {

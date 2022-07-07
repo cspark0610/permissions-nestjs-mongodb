@@ -1,7 +1,8 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
-import { MongoConnectionModule } from 'src/modules/mongo-connection/mongo-connection.module';
-import configuration from 'src/configuration/configuration';
+import configuration from './configuration/configuration';
+import { MongoConnectionModule } from './modules/mongo-connection/mongo-connection.module';
+import { PermissionsModule } from './modules/permissions/permissions.module';
 require('dotenv').config();
 
 @Module({
@@ -12,13 +13,14 @@ require('dotenv').config();
       envFilePath: `./env/${process.env.NODE_ENV}.env`,
       isGlobal: true,
     }),
+    PermissionsModule,
   ],
   controllers: [],
   providers: [],
 })
 export class AppModule {
   constructor() {
-    console.log(process.env.NODE_ENV, 'process.env.NODE_ENV');
-    console.log(configuration(), 'configuration');
+    // console.log(process.env.NODE_ENV, 'process.env.NODE_ENV');
+    // console.log(configuration(), 'configuration');
   }
 }

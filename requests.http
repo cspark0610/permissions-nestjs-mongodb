@@ -1,0 +1,7 @@
+POST http://localhost:4002/api/v1/permissions
+Content-Type: "application/json"
+
+{
+  "name": "superuser2"
+}
+###
