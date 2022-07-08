@@ -18,5 +18,6 @@ import { Role, RoleSchema } from 'src/modules/roles/schemas/role.schema';
       inject: [MongoConnectionService],
     },
   ],
+  exports: [RolesService],
 })
 export class RolesModule {}
