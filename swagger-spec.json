@@ -4,30 +4,49 @@
     "/permissions": {
       "post": {
         "operationId": "PermissionsController_createPermission",
+        "summary": "",
+        "description": "Crea un permiso",
         "parameters": [],
         "requestBody": {
           "required": true,
+          "description": "crea un permiso usando un PermissionDto",
           "content": {
             "application/json": {
               "schema": {
                 "$ref": "#/components/schemas/PermissionDto"
+              },
+              "examples": {
+                "ejemplo1": {
+                  "value": {
+                    "name": "create"
+                  }
+                }
               }
             }
           }
         },
         "responses": {
           "201": {
-            "description": ""
+            "description": "Permiso creado correctamente"
+          },
+          "409": {
+            "description": "Permiso existe"
           }
-        }
+        },
+        "tags": [
+          "permissions"
+        ]
       },
       "get": {
         "operationId": "PermissionsController_getAllPermissions",
+        "summary": "",
+        "description": "Deveulve los permisos filtrados por name",
         "parameters": [
           {
             "name": "name",
-            "required": true,
+            "required": false,
             "in": "query",
+            "description": "Deveulve los permisos filtrados por name",
             "schema": {
               "type": "string"
             }
@@ -35,38 +54,61 @@
         ],
         "responses": {
           "200": {
-            "description": ""
+            "description": "Permisos devueltos correctamente"
           }
-        }
+        },
+        "tags": [
+          "permissions"
+        ]
       },
       "put": {
         "operationId": "PermissionsController_updatePermission",
+        "summary": "",
+        "description": "Actualiza un permiso",
         "parameters": [],
         "requestBody": {
           "required": true,
+          "description": "ACtualiza un permiso usando un UpdatePermissionDto",
           "content": {
             "application/json": {
               "schema": {
                 "$ref": "#/components/schemas/UpdatePermissionDto"
+              },
+              "examples": {
+                "ejemplo1": {
+                  "value": {
+                    "originalName": "create",
+                    "newName": "delete"
+                  }
+                }
               }
             }
           }
         },
         "responses": {
           "200": {
-            "description": ""
+            "description": "Permiso actualizado correctamente"
+          },
+          "409": {
+            "description": "Ambos Permisos existen"
           }
-        }
+        },
+        "tags": [
+          "permissions"
+        ]
       }
     },
     "/permissions/{name}": {
       "delete": {
         "operationId": "PermissionsController_deletePermission",
+        "summary": "",
+        "description": "Borra un permiso dado un name y devuelve el borrado",
         "parameters": [
           {
             "name": "name",
             "required": true,
             "in": "path",
+            "description": "Pasar el name del permiso a borrar",
             "schema": {
               "type": "string"
             }
@@ -74,9 +116,12 @@
         ],
         "responses": {
           "200": {
-            "description": ""
+            "description": "Permisos borrado correctamente"
           }
-        }
+        },
+        "tags": [
+          "permissions"
+        ]
       }
     }
   },

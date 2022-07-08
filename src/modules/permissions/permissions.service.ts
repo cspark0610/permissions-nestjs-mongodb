@@ -11,12 +11,14 @@ export class PermissionsService {
     private permissionModel: Model<PermissionInterface>,
   ) {}
 
+  async findPermissionByName(name: string) {
+    return this.permissionModel.findOne({ name });
+  }
+
   async createPermission(
     permissionDto: PermissionDto,
   ): Promise<PermissionInterface> {
-    const exists = await this.permissionModel.findOne({
-      name: permissionDto.name,
-    });
+    const exists = await this.findPermissionByName(permissionDto.name);
     if (exists) {
       throw new ConflictException('Permission already exists');
     }
@@ -36,12 +38,12 @@ export class PermissionsService {
   async updatePermission(
     updatePermission: UpdatePermissionDto,
   ): Promise<PermissionInterface> {
-    const foundPermission = await this.permissionModel.findOne({
-      name: updatePermission.originalName,
-    });
-    const newPermission = await this.permissionModel.findOne({
-      name: updatePermission.newName,
-    });
+    const foundPermission = await this.findPermissionByName(
+      updatePermission.originalName,
+    );
+    const newPermission = await this.findPermissionByName(
+      updatePermission.newName,
+    );
 
     if (foundPermission && !newPermission) {
       await foundPermission.updateOne({

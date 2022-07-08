@@ -1,8 +1,9 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
-import configuration from './configuration/configuration';
-import { MongoConnectionModule } from './modules/mongo-connection/mongo-connection.module';
-import { PermissionsModule } from './modules/permissions/permissions.module';
+import configuration from 'src/configuration/configuration';
+import { MongoConnectionModule } from 'src/modules/mongo-connection/mongo-connection.module';
+import { PermissionsModule } from 'src/modules/permissions/permissions.module';
+import { RolesModule } from 'src/modules/roles/roles.module';
 require('dotenv').config();
 
 @Module({
@@ -14,6 +15,7 @@ require('dotenv').config();
       isGlobal: true,
     }),
     PermissionsModule,
+    RolesModule,
   ],
   controllers: [],
   providers: [],
