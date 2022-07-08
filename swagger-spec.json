@@ -123,6 +123,251 @@
           "permissions"
         ]
       }
+    },
+    "/roles": {
+      "post": {
+        "operationId": "RolesController_createRole",
+        "summary": "",
+        "description": "Crea un rol",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "description": "crea un rol usando un roleDto",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RoleDto"
+              },
+              "examples": {
+                "ejemplo1": {
+                  "value": {
+                    "name": "superuser",
+                    "permissions": [
+                      {
+                        "name": "CREATE"
+                      },
+                      {
+                        "name": "UPDATE"
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "ROL creado correctamente"
+          },
+          "409": {
+            "description": "ROL existe, <br/> El permiso no existe"
+          }
+        },
+        "tags": [
+          "roles"
+        ]
+      },
+      "get": {
+        "operationId": "RolesController_getRoles",
+        "summary": "",
+        "description": "Devuelve los roles filtrados por name",
+        "parameters": [
+          {
+            "name": "name",
+            "required": false,
+            "in": "query",
+            "description": "Filtra los roles segun el name dado",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Roles devueltos correctamente"
+          }
+        },
+        "tags": [
+          "roles"
+        ]
+      }
+    },
+    "/roles/{name}": {
+      "put": {
+        "operationId": "RolesController_updateRole",
+        "summary": "",
+        "description": "Actualiza un rol",
+        "parameters": [
+          {
+            "name": "name",
+            "required": true,
+            "in": "path",
+            "description": "pasar como param el nomnbre del rol a actualizar",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "description": "Actualiza un rol usando un roleDto",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RoleDto"
+              },
+              "examples": {
+                "ejemplo1": {
+                  "value": {
+                    "name": "superuser",
+                    "permissions": [
+                      {
+                        "name": "CREATE"
+                      },
+                      {
+                        "name": "UPDATE"
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "ROL actualizado correctamente"
+          },
+          "409": {
+            "description": "ROL ya existe, <br/> El permiso no existe"
+          }
+        },
+        "tags": [
+          "roles"
+        ]
+      },
+      "delete": {
+        "operationId": "RolesController_deleteRole",
+        "summary": "",
+        "description": "Elimina un rol",
+        "parameters": [
+          {
+            "name": "name",
+            "required": true,
+            "in": "path",
+            "description": "nombre del rol a eliminar",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Rol eliminado correctamente"
+          },
+          "409": {
+            "description": "ROL no existe"
+          }
+        },
+        "tags": [
+          "roles"
+        ]
+      }
+    },
+    "/roles/add-permission/{name}": {
+      "patch": {
+        "operationId": "RolesController_addPermission",
+        "summary": "",
+        "description": "Agrega un permiso a un rol",
+        "parameters": [
+          {
+            "name": "name",
+            "required": true,
+            "in": "path",
+            "description": "pasar como param el nombre del rol a agregarle un permiso",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "description": "Pasar un permissionDto para agregar un permiso a un rol",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PermissionDto"
+              },
+              "examples": {
+                "ejemplo1": {
+                  "value": {
+                    "name": "READ"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "permiso agregado al rol correctamente"
+          },
+          "409": {
+            "description": "ROL no existe, <br/> El permiso no existe <br/>. El permiso ya existe en el rol"
+          }
+        },
+        "tags": [
+          "roles"
+        ]
+      }
+    },
+    "/roles/remove-permission/{name}": {
+      "patch": {
+        "operationId": "RolesController_removePermission",
+        "summary": "",
+        "description": "Borra un permiso a un rol",
+        "parameters": [
+          {
+            "name": "name",
+            "required": true,
+            "in": "path",
+            "description": "pasar como param el nombre del rol a borrarle un permiso",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "description": "Pasar un permissionDto para borrar un permiso a un rol",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PermissionDto"
+              },
+              "examples": {
+                "ejemplo1": {
+                  "value": {
+                    "name": "UPDATE"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "permiso borrado al rol correctamente"
+          },
+          "409": {
+            "description": "ROL no existe, <br/> El permiso no existe <br/>. El permiso no existe en el rol para ser borrado"
+          }
+        },
+        "tags": [
+          "roles"
+        ]
+      }
     }
   },
   "info": {
@@ -162,6 +407,25 @@
         "required": [
           "originalName",
           "newName"
+        ]
+      },
+      "RoleDto": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Name of the role"
+          },
+          "permissions": {
+            "description": "Lista de permimsos asociado a un rol",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PermissionDto"
+            }
+          }
+        },
+        "required": [
+          "name"
         ]
       }
     }
