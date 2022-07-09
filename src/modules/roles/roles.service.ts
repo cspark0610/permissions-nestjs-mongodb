@@ -1,10 +1,16 @@
-import { ConflictException, Inject, Injectable } from '@nestjs/common';
+import {
+  ConflictException,
+  Inject,
+  Injectable,
+  forwardRef,
+} from '@nestjs/common';
 import { Model } from 'mongoose';
 import { RoleInterface } from 'src/modules/roles/interfaces/role.interface';
 import { PermissionsService } from 'src/modules/permissions/permissions.service';
 import { RoleDto } from 'src/modules/roles/dto/role.dto';
 import { PermissionInterface } from 'src/modules/permissions/interfaces/permission.interface';
 import { PermissionDto } from 'src/modules/permissions/dto/permission.dto';
+import { UsersService } from '../users/users.service';
 
 @Injectable()
 export class RolesService {
@@ -12,6 +18,8 @@ export class RolesService {
     @Inject('ROLE_MODEL')
     private roleModel: Model<RoleInterface>,
     private permissionsService: PermissionsService,
+    @Inject(forwardRef(() => UsersService))
+    private usersSevice: UsersService,
   ) {}
 
   async findRoleByName(name: string) {
@@ -140,12 +148,21 @@ export class RolesService {
     return this.updateRole(name, roleExists);
   }
 
+  /**
+   * queremos agreagar la condicion de que si hay mas de un usuario con el mismo rol, no podamos borrar ese rol
+   */
   async deleteRole(name: string) {
     const roleExists = await this.findRoleByName(name);
 
     if (!roleExists)
       throw new ConflictException(`Role con nombre ${name} no existe`);
 
+    // comprobar que el rol no esta siendo usado por mas de 1 usuario
+    const num = await this.usersSevice.countUsersWithRole(name);
+    if (num > 0)
+      throw new ConflictException(
+        `El rol ${name} esta siendo usado por mas de 1 usuario y por ende no puede ser borrado`,
+      );
     await roleExists.delete();
     return roleExists;
   }

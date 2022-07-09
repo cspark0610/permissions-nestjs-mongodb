@@ -5,13 +5,14 @@ import { UserInterface } from 'src/modules/users/interfaces/user.interface';
 
 @Schema()
 export class User implements UserInterface {
+  // schematypes.d.ts to see all the available options that can be passes in @Prop()
   @Prop({ type: Number, unique: true })
   userCode: number;
 
   @Prop({ type: String })
   name: string;
 
-  @Prop({ type: String, unique: true, trim: true })
+  @Prop({ type: String, unique: true, trim: true, lowercase: true })
   email: string;
 
   @Prop({ type: Date })

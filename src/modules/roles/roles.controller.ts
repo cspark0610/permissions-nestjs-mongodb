@@ -171,7 +171,7 @@ export class RolesController {
   })
   @ApiResponse({
     status: 409,
-    description: 'ROL no existe',
+    description: 'ROL no existe<br/>. Existen usuarios con este rol',
   })
   async deleteRole(@Param('name') name: string) {
     return this.rolesService.deleteRole(name);

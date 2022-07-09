@@ -267,7 +267,7 @@
             "description": "Rol eliminado correctamente"
           },
           "409": {
-            "description": "ROL no existe"
+            "description": "ROL no existe<br/>. Existen usuarios con este rol"
           }
         },
         "tags": [
@@ -368,6 +368,238 @@
           "roles"
         ]
       }
+    },
+    "/users": {
+      "post": {
+        "operationId": "UsersController_createUser",
+        "summary": "",
+        "description": "Crea un usuario",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "description": "crea un usuario usando un userDto",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UserDto"
+              },
+              "examples": {
+                "ejemplo1": {
+                  "value": {
+                    "name": "user1",
+                    "email": "f1@email.com",
+                    "birthday": "1990-02-02",
+                    "role": {
+                      "name": "ADMIN"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "usuario creado correctamente"
+          },
+          "409": {
+            "description": "Email del user ya existe, <br/> El rol no existe"
+          }
+        },
+        "tags": [
+          "users"
+        ]
+      },
+      "get": {
+        "operationId": "UsersController_getUsers",
+        "summary": "",
+        "description": "Devuelve todos los usuarios con roles y permisos populados",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Usuarios devueltos correctamente"
+          }
+        },
+        "tags": [
+          "users"
+        ]
+      },
+      "put": {
+        "operationId": "UsersController_updateUser",
+        "summary": "",
+        "description": "Actualiza un usuario",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "description": "Actualiza un usuario usando un userDto",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UserDto"
+              },
+              "examples": {
+                "ejemplo1": {
+                  "value": {
+                    "name": "user2",
+                    "email": "f1@email.com",
+                    "birthday": "1990-02-02",
+                    "role": null
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Usuario actualizado correctamente"
+          }
+        },
+        "tags": [
+          "users"
+        ]
+      }
+    },
+    "/users/deleted": {
+      "get": {
+        "operationId": "UsersController_getUsersDeleted",
+        "summary": "",
+        "description": "Devuelve todos los usuarios borrados",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Usuarios devueltos correctamente"
+          }
+        },
+        "tags": [
+          "users"
+        ]
+      }
+    },
+    "/users/add-role": {
+      "patch": {
+        "operationId": "UsersController_addRole",
+        "summary": "",
+        "description": "Agrega un rol a un usuario",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "description": "Pasar un UserRoleDto para agregar un rol",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UserRoleDto"
+              },
+              "examples": {
+                "ejemplo1": {
+                  "value": {
+                    "userCode": 1,
+                    "roleName": "SUPERUSER"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "rol agregado correctamente al usuario"
+          },
+          "409": {
+            "description": "el usuario ya tiene un rol, <br/> El rol no existe<br/>. El usuario no existe"
+          }
+        },
+        "tags": [
+          "users"
+        ]
+      }
+    },
+    "/users/remove-role/{userCode}": {
+      "patch": {
+        "operationId": "UsersController_removeRole",
+        "summary": "",
+        "description": "Elimina un rol a un usuario",
+        "parameters": [
+          {
+            "name": "userCode",
+            "required": true,
+            "in": "path",
+            "description": "Codigo del usuario al cual vamos a eliminar su rol",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Rol eliminado correctamente del usuario"
+          },
+          "409": {
+            "description": "El rol no existe<br/>. El usuario no existe"
+          }
+        },
+        "tags": [
+          "users"
+        ]
+      }
+    },
+    "/users/{userCode}": {
+      "patch": {
+        "operationId": "UsersController_deleteUser",
+        "summary": "",
+        "description": "Actualiza a un usuario con deleted:true",
+        "parameters": [
+          {
+            "name": "userCode",
+            "required": true,
+            "in": "path",
+            "description": "Codigo del usuario al cual vamos a pasarle deleted: true",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "usuario eliminado correctamente"
+          },
+          "409": {
+            "description": "El usuario ya esta borrado <br/>. El usuario no existe para ser borrado"
+          }
+        },
+        "tags": [
+          "users"
+        ]
+      }
+    },
+    "/users/restore/{userCode}": {
+      "patch": {
+        "operationId": "UsersController_restoreUser",
+        "summary": "",
+        "description": "Actualiza a un usuario con deleted:false",
+        "parameters": [
+          {
+            "name": "userCode",
+            "required": true,
+            "in": "path",
+            "description": "Codigo del usuario al cual vamos a pasarle deleted: true",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "usuario restaurado correctamente"
+          },
+          "409": {
+            "description": "El usuario ya esta restaurado <br/>. El usuario no existe para ser restaurado"
+          }
+        },
+        "tags": [
+          "users"
+        ]
+      }
     }
   },
   "info": {
@@ -426,6 +658,46 @@
         },
         "required": [
           "name"
+        ]
+      },
+      "UserDto": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "format": "date-time",
+            "type": "string",
+            "description": "Fecha de nacimiento del usuario"
+          },
+          "role": {
+            "description": "Role del usuario",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/RoleDto"
+              }
+            ]
+          }
+        },
+        "required": [
+          "name",
+          "name",
+          "name"
+        ]
+      },
+      "UserRoleDto": {
+        "type": "object",
+        "properties": {
+          "userCode": {
+            "type": "number",
+            "description": "Codigo del usuario al cual se le va a agregar un rol"
+          },
+          "roleName": {
+            "type": "string",
+            "description": "noimbre del rol a agregar al usuario, agregado en mayusculas"
+          }
+        },
+        "required": [
+          "userCode",
+          "roleName"
         ]
       }
     }
