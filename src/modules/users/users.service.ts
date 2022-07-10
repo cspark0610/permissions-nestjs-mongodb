@@ -10,6 +10,7 @@ import { RolesService } from 'src/modules/roles/roles.service';
 import { UserDto } from 'src/modules/users/dto/user.dto';
 import { Permission } from 'src/modules/permissions/schemas/permission.schema';
 import { UserRoleDto } from 'src/modules/users/dto/user-role.dto';
+import { Logger } from 'src/common/decorators/logger.decorator';
 
 @Injectable()
 export class UsersService {
@@ -52,7 +53,6 @@ export class UsersService {
     return newUser;
   }
 
-  // console.log(await this.countUsersWithRole('ADMIN1'));
   async getUsers() {
     // popular referencias anidadas user -> role[] -> permission[]
     // path: nombre del campo en el UserSchema
@@ -176,6 +176,7 @@ export class UsersService {
   }
 
   // para usar en RolesService
+  @Logger()
   async countUsersWithRole(roleName: string): Promise<number> {
     roleName = roleName.toUpperCase();
     // vamos a hacer "leftjoins" del modelo user con el modelo role, operador $lookup
