@@ -1,6 +1,6 @@
-import { Types } from 'mongoose';
+import { ObjectId } from 'mongoose';
 
 export interface RoleInterface {
   name: string;
-  permissions?: Types.ObjectId[];
+  permissions?: ObjectId[];
 }

@@ -1,7 +1,6 @@
 import { Module } from '@nestjs/common';
 import { PermissionsController } from 'src/modules/permissions/permissions.controller';
 import { PermissionsService } from 'src/modules/permissions/permissions.service';
-// import { MongoConnectionModule } from 'src/modules/mongo-connection/mongo-connection.module';
 import { MongoConnectionService } from 'src/modules/mongo-connection/mongo-connection.service';
 import { PermissionInterface } from 'src/modules/permissions/interfaces/permission.interface';
 import {
@@ -18,6 +17,7 @@ import {
      * provide = Nombre del proveedor para el servicio
      * useFactory = Función a ejecutar
      * inject = Clases necesarias para useFactory
+     * .model(DB name, schema Name, collection Name )
      */
     {
       provide: 'PERMISSION_MODEL',

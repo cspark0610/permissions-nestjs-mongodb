@@ -11,7 +11,7 @@ import {
 import { PermissionsService } from 'src/modules/permissions/permissions.service';
 import { PermissionDto } from 'src/modules/permissions/dto/permission.dto';
 import { PermissionInterface } from 'src/modules/permissions/interfaces/permission.interface';
-import { UpdatePermissionDto } from './dto/update-permission.dto';
+import { UpdatePermissionDto } from 'src/modules/permissions/dto/update-permission.dto';
 import {
   ApiBody,
   ApiOperation,

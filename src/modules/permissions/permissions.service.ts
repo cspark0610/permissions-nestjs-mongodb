@@ -2,7 +2,7 @@ import { ConflictException, Inject, Injectable } from '@nestjs/common';
 import { Model } from 'mongoose';
 import { PermissionInterface } from 'src/modules/permissions/interfaces/permission.interface';
 import { PermissionDto } from 'src/modules/permissions/dto/permission.dto';
-import { UpdatePermissionDto } from './dto/update-permission.dto';
+import { UpdatePermissionDto } from 'src/modules/permissions/dto/update-permission.dto';
 
 @Injectable()
 export class PermissionsService {
@@ -63,13 +63,11 @@ export class PermissionsService {
     const foundPermission = await this.permissionModel.findOne({
       name,
     });
-    if (foundPermission) {
-      await foundPermission.delete();
-      return foundPermission;
-    } else {
+    if (!foundPermission)
       throw new ConflictException(
         'No se puede eliminar el permiso porque no existe',
       );
-    }
+    await foundPermission.delete();
+    return foundPermission;
   }
 }

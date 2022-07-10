@@ -10,7 +10,7 @@ import { PermissionsService } from 'src/modules/permissions/permissions.service'
 import { RoleDto } from 'src/modules/roles/dto/role.dto';
 import { PermissionInterface } from 'src/modules/permissions/interfaces/permission.interface';
 import { PermissionDto } from 'src/modules/permissions/dto/permission.dto';
-import { UsersService } from '../users/users.service';
+import { UsersService } from 'src/modules/users/users.service';
 
 @Injectable()
 export class RolesService {

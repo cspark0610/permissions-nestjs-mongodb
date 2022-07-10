@@ -1,5 +1,5 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { PermissionInterface } from '../interfaces/permission.interface';
+import { PermissionInterface } from 'src/modules/permissions/interfaces/permission.interface';
 
 @Schema()
 export class Permission implements PermissionInterface {
