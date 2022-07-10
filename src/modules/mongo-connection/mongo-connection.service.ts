@@ -10,7 +10,7 @@ export class MongoConnectionService {
     this.createConnectionDB();
   }
 
-  async createConnectionDB() {
+  createConnectionDB() {
     const host = this.configService.get('mongo.host');
     const port = this.configService.get('mongo.port');
     const user = this.configService.get('mongo.user');
@@ -22,7 +22,7 @@ export class MongoConnectionService {
         ? `mongodb://${user}:${password}@${host}:${port}/${database}`
         : `mongodb://${host}:${port}/${database}`;
 
-    this.dbConnection = await createConnection(mongoDB_URI);
+    this.dbConnection = createConnection(mongoDB_URI);
     this.dbConnection.once('open', () => {
       console.log('MongoDB is connected to database ' + database);
     });
