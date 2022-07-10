@@ -9,6 +9,7 @@ async function bootstrap() {
   app.useGlobalPipes(new ValidationPipe({ transform: true }));
   const port = process.env.PORT || 4002;
 
+  app.setGlobalPrefix('api/v1');
   const config = new DocumentBuilder()
     .setTitle('permimssions nest-api')
     .setDescription('example api mongoDB-mongoose')
@@ -19,7 +20,6 @@ async function bootstrap() {
   fs.writeFileSync('./swagger-spec.json', JSON.stringify(document, null, 2));
   SwaggerModule.setup('swagger', app, document);
 
-  app.setGlobalPrefix('api/v1');
   await app.listen(port, () => {
     console.log(`Server running on port ${port}`);
   });

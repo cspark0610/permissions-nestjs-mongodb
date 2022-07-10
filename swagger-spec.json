@@ -1,7 +1,7 @@
 {
   "openapi": "3.0.0",
   "paths": {
-    "/permissions": {
+    "/api/v1/permissions": {
       "post": {
         "operationId": "PermissionsController_createPermission",
         "summary": "",
@@ -98,7 +98,7 @@
         ]
       }
     },
-    "/permissions/{name}": {
+    "/api/v1/permissions/{name}": {
       "delete": {
         "operationId": "PermissionsController_deletePermission",
         "summary": "",
@@ -124,7 +124,7 @@
         ]
       }
     },
-    "/roles": {
+    "/api/v1/roles": {
       "post": {
         "operationId": "RolesController_createRole",
         "summary": "",
@@ -193,7 +193,7 @@
         ]
       }
     },
-    "/roles/{name}": {
+    "/api/v1/roles/{name}": {
       "put": {
         "operationId": "RolesController_updateRole",
         "summary": "",
@@ -275,7 +275,7 @@
         ]
       }
     },
-    "/roles/add-permission/{name}": {
+    "/api/v1/roles/add-permission/{name}": {
       "patch": {
         "operationId": "RolesController_addPermission",
         "summary": "",
@@ -322,7 +322,7 @@
         ]
       }
     },
-    "/roles/remove-permission/{name}": {
+    "/api/v1/roles/remove-permission/{name}": {
       "patch": {
         "operationId": "RolesController_removePermission",
         "summary": "",
@@ -369,7 +369,7 @@
         ]
       }
     },
-    "/users": {
+    "/api/v1/users": {
       "post": {
         "operationId": "UsersController_createUser",
         "summary": "",
@@ -460,7 +460,7 @@
         ]
       }
     },
-    "/users/deleted": {
+    "/api/v1/users/deleted": {
       "get": {
         "operationId": "UsersController_getUsersDeleted",
         "summary": "",
@@ -476,7 +476,7 @@
         ]
       }
     },
-    "/users/add-role": {
+    "/api/v1/users/add-role": {
       "patch": {
         "operationId": "UsersController_addRole",
         "summary": "",
@@ -514,7 +514,7 @@
         ]
       }
     },
-    "/users/remove-role/{userCode}": {
+    "/api/v1/users/remove-role/{userCode}": {
       "patch": {
         "operationId": "UsersController_removeRole",
         "summary": "",
@@ -543,7 +543,7 @@
         ]
       }
     },
-    "/users/{userCode}": {
+    "/api/v1/users/{userCode}": {
       "patch": {
         "operationId": "UsersController_deleteUser",
         "summary": "",
@@ -572,7 +572,7 @@
         ]
       }
     },
-    "/users/restore/{userCode}": {
+    "/api/v1/users/restore/{userCode}": {
       "patch": {
         "operationId": "UsersController_restoreUser",
         "summary": "",
