@@ -1,10 +1,9 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
-import configuration from 'src/configuration/configuration';
+import configuration from 'src/configuration/mongo.configuration';
 import { MongoConnectionModule } from 'src/modules/mongo-connection/mongo-connection.module';
 import { PermissionsModule } from 'src/modules/permissions/permissions.module';
 import { RolesModule } from 'src/modules/roles/roles.module';
-require('dotenv').config();
 
 @Module({
   imports: [
