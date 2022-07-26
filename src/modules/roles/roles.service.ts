@@ -4,28 +4,29 @@ import {
   Injectable,
   forwardRef,
 } from '@nestjs/common';
-import { Model } from 'mongoose';
-import { RoleInterface } from 'src/modules/roles/interfaces/role.interface';
 import { PermissionsService } from 'src/modules/permissions/permissions.service';
 import { RoleDto } from 'src/modules/roles/dto/role.dto';
 import { PermissionInterface } from 'src/modules/permissions/interfaces/permission.interface';
 import { PermissionDto } from 'src/modules/permissions/dto/permission.dto';
 import { UsersService } from 'src/modules/users/users.service';
+import { UsersRepository } from 'src/modules/users/users.repository';
+import { RolesRepository } from 'src/modules/roles/roles.repository';
 
 @Injectable()
 export class RolesService {
   constructor(
-    @Inject('ROLE_MODEL')
-    private roleModel: Model<RoleInterface>,
+    private usersRepository: UsersRepository,
+    private rolesRepository: RolesRepository,
     private permissionsService: PermissionsService,
     @Inject(forwardRef(() => UsersService))
     private usersSevice: UsersService,
   ) {}
 
   async findRoleByName(name: string) {
-    return (
-      await this.roleModel.findOne({ name: name.toUpperCase() })
-    ).populate<{ permissions: PermissionInterface[] }>('permissions');
+    name = name.toUpperCase();
+    return (await this.usersRepository.findOne({ name })).populate<{
+      permissions: PermissionInterface[];
+    }>('permissions');
   }
 
   async createRole(roleDto: RoleDto) {
@@ -48,16 +49,16 @@ export class RolesService {
       }
       roleDto.permissions = permissionsRole;
     }
-
-    const role = new this.roleModel(roleDto);
-    await role.save();
+    const role = await this.rolesRepository.create(roleDto);
     return role.populate('permissions');
   }
 
   async getRoles(name: string) {
     const filterObj = {};
     name ? (filterObj['name'] = { $regex: name, $options: 'i' }) : {};
-    return this.roleModel.find(filterObj).populate('permissions');
+    return (this.rolesRepository.find(filterObj) as any).populate(
+      'permissions',
+    );
   }
 
   async updateRole(name: string, roleDto: RoleDto) {
@@ -87,7 +88,7 @@ export class RolesService {
         roleDto.permissions = permissionsRole;
       }
       await roleExists.updateOne(roleDto);
-      const roleUpdated = await this.roleModel.findById(roleExists._id);
+      const roleUpdated = await this.rolesRepository.findById(roleExists._id);
       return roleUpdated.populate('permissions');
     } else {
       // creamos el role

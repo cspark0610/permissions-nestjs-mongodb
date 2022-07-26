@@ -4,29 +4,28 @@ import {
   ConflictException,
   forwardRef,
 } from '@nestjs/common';
-import { Model } from 'mongoose';
-import { UserInterface } from 'src/modules/users/interfaces/user.interface';
 import { RolesService } from 'src/modules/roles/roles.service';
 import { UserDto } from 'src/modules/users/dto/user.dto';
 import { Permission } from 'src/modules/permissions/schemas/permission.schema';
 import { UserRoleDto } from 'src/modules/users/dto/user-role.dto';
 import { Logger } from 'src/common/decorators/logger.decorator';
+import { UsersRepository } from './users.repository';
 
 @Injectable()
 export class UsersService {
   constructor(
-    @Inject('USER_MODEL') private userModel: Model<UserInterface>,
+    private usersRepository: UsersRepository,
     // si quiero inyectar el RolesService debo exportarlo desde el RoleModule, exports: [RolesService]
     @Inject(forwardRef(() => RolesService))
     private rolesService: RolesService,
   ) {}
 
   async findUserByEmail(email: string) {
-    return this.userModel.findOne({ email: email.toLowerCase() });
+    return this.usersRepository.findOne({ email: email.toLowerCase() });
   }
 
   async findUserByUserCode(userCode: number) {
-    return this.userModel.findOne({ userCode });
+    return this.usersRepository.findOne({ userCode });
   }
 
   async createUser(userDto: UserDto) {
@@ -46,11 +45,11 @@ export class UsersService {
       userDto.role = roleExists;
     }
 
-    const nUsers: number = await this.userModel.countDocuments();
-    // inicialmente 0
-    const newUser = new this.userModel({ ...userDto, userCode: nUsers + 1 });
-    await newUser.save();
-    return newUser;
+    const nUsers: number = await this.usersRepository.countDocuments(); // inicialmente 0
+    return this.usersRepository.create({
+      ...userDto,
+      userCode: nUsers + 1,
+    });
   }
 
   async getUsers() {
@@ -64,7 +63,8 @@ export class UsersService {
         model: Permission.name,
       },
     };
-    return this.userModel.find().populate(populate);
+    const users = (await this.usersRepository.find({})) as any;
+    return users.populate(populate);
   }
 
   async getUsersDeleted() {
@@ -75,7 +75,10 @@ export class UsersService {
         model: Permission.name,
       },
     };
-    return this.userModel.find({ deleted: true }).populate(populate);
+    const deletedUsers = (await this.usersRepository.find({
+      deleted: true,
+    })) as any;
+    return deletedUsers.populate(populate);
   }
 
   async updateUser(userDto: UserDto) {
@@ -179,30 +182,8 @@ export class UsersService {
   @Logger()
   async countUsersWithRole(roleName: string): Promise<number> {
     roleName = roleName.toUpperCase();
-    // vamos a hacer "leftjoins" del modelo user con el modelo role, operador $lookup
-    // { from: <nombre de la colleccion a agregar>, localField: <propiedad del modelo al cual hacemos el aggregate>,
-    // foreignField: <nombre del campo que debe coincidir>, as: 'role' }
-    const usersWithRole = await this.userModel.aggregate([
-      {
-        $lookup: {
-          from: 'roles',
-          localField: 'role',
-          foreignField: '_id',
-          as: 'roles',
-          // el alias as es para usar en el $match
-        },
-      },
-      {
-        $match: {
-          'roles.name': roleName,
-        },
-      },
-      {
-        $count: 'count',
-      },
-      // CON EL COUNT lo formatea a [ { count: 2 } ]
-    ]);
-    if (usersWithRole.length) return usersWithRole[0].count;
+    const res = await this.usersRepository.getUsersWithRoles(roleName);
+    if (res.length) return res[0].count;
     return 0;
   }
 }

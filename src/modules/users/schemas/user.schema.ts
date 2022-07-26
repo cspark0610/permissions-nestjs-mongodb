@@ -2,9 +2,10 @@ import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { ObjectId, Types } from 'mongoose';
 import { Role } from 'src/modules/roles/schemas/role.schema';
 import { UserInterface } from 'src/modules/users/interfaces/user.interface';
+import { Document } from 'mongoose';
 
 @Schema()
-export class User implements UserInterface {
+export class User extends Document implements UserInterface {
   // schematypes.d.ts to see all the available options that can be passes in @Prop()
   @Prop({ type: Number, unique: true })
   userCode: number;

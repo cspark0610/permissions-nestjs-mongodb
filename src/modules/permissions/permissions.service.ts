@@ -1,30 +1,23 @@
-import { ConflictException, Inject, Injectable } from '@nestjs/common';
-import { Model } from 'mongoose';
+import { ConflictException, Injectable } from '@nestjs/common';
 import { PermissionInterface } from 'src/modules/permissions/interfaces/permission.interface';
 import { PermissionDto } from 'src/modules/permissions/dto/permission.dto';
 import { UpdatePermissionDto } from 'src/modules/permissions/dto/update-permission.dto';
+import { PermissionsRepository } from 'src/modules/permissions/permissions.repository';
 
 @Injectable()
 export class PermissionsService {
-  constructor(
-    @Inject('PERMISSION_MODEL')
-    private permissionModel: Model<PermissionInterface>,
-  ) {}
+  constructor(private permissionsRepository: PermissionsRepository) {}
 
   async findPermissionByName(name: string) {
-    return this.permissionModel.findOne({ name });
+    return this.permissionsRepository.findOne({ name });
   }
 
   async createPermission(
     permissionDto: PermissionDto,
   ): Promise<PermissionInterface> {
     const exists = await this.findPermissionByName(permissionDto.name);
-    if (exists) {
-      throw new ConflictException('Permission already exists');
-    }
-
-    const permission = new this.permissionModel(permissionDto);
-    return permission.save();
+    if (exists) throw new ConflictException('Permission already exists');
+    return this.permissionsRepository.create(permissionDto);
   }
 
   async getAllPermissions(name: string): Promise<PermissionInterface[]> {
@@ -32,7 +25,7 @@ export class PermissionsService {
     name ? (filterObj['name'] = { $regex: name, $options: 'i' }) : {};
     // { name: { '$regex': 'upd', '$options': 'i' } }
 
-    return this.permissionModel.find(filterObj);
+    return this.permissionsRepository.find(filterObj);
   }
 
   async updatePermission(
@@ -49,7 +42,7 @@ export class PermissionsService {
       await foundPermission.updateOne({
         name: updatePermission.newName,
       });
-      return this.permissionModel.findById(foundPermission._id);
+      return this.permissionsRepository.findById(foundPermission._id);
     } else if (!foundPermission) {
       const permission = new PermissionDto();
       permission.name = updatePermission.originalName;
@@ -60,14 +53,11 @@ export class PermissionsService {
   }
 
   async deletePermission(name: string): Promise<PermissionInterface> {
-    const foundPermission = await this.permissionModel.findOne({
-      name,
-    });
-    if (!foundPermission)
+    const res = await this.permissionsRepository.findOneAndDelete({ name });
+    if (!res)
       throw new ConflictException(
         'No se puede eliminar el permiso porque no existe',
       );
-    await foundPermission.delete();
-    return foundPermission;
+    return res;
   }
 }
