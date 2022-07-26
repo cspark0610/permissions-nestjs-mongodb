@@ -1,43 +1,74 @@
 import { Document, FilterQuery, Model, UpdateQuery } from 'mongoose';
+import mongoose from 'mongoose';
+mongoose.Promise = require('bluebird');
+import { AppException } from '../exceptions/appException';
+import { HttpStatus } from '@nestjs/common';
 
 export abstract class BaseRepository<T extends Document> {
   constructor(protected readonly model: Model<T>) {}
 
-  async findOne(
+  async findOne(filterQuery: FilterQuery<T>, path?: string | string[]) {
+    if (path) {
+      const res = await this.model
+        .findOne(filterQuery, { __v: 0 })
+        .populate(path)
+        .exec();
+      if (!res) {
+        throw new AppException({
+          error: 'No se encontró el registro',
+          errorCode: 'NOT_FOUND',
+          statusCode: HttpStatus.NOT_FOUND,
+        });
+      }
+      return res;
+    }
+    return this.model.findOne(filterQuery);
+  }
+
+  async findById(id: string, path?: string | string[]) {
+    if (path) {
+      const res = await this.model
+        .findById(id, {
+          __v: 0,
+        })
+        .populate(path)
+        .exec();
+      if (!res) {
+        throw new AppException({
+          error: 'No se encontró el registro',
+          errorCode: 'NOT_FOUND',
+          statusCode: HttpStatus.NOT_FOUND,
+        });
+      }
+      return res;
+    }
+    return this.model.findById(id, { __v: 0 });
+  }
+
+  async find(
     filterQuery: FilterQuery<T>,
-    projection?: Record<string, unknown>,
-  ): Promise<T> {
-    return this.model
-      .findOne(filterQuery, {
-        __v: 0,
-        ...projection,
-      })
-      .exec();
-  }
-
-  async findById(id: string): Promise<T | null> {
-    return this.model
-      .findById(id, {
-        __v: 0,
-      })
-      .exec();
-  }
-
-  async find(filterQuery: FilterQuery<T>): Promise<T[] | null> {
-    return this.model
-      .find(filterQuery, {
-        __v: 0,
-      })
-      .exec();
+    path?: string | string[],
+  ): Promise<T[] | null> {
+    if (path) {
+      const res = await this.model
+        .find(filterQuery, { __v: 0 })
+        .populate(path)
+        .exec();
+      if (!res) {
+        throw new Error('No se encontró el registro');
+      }
+      return res;
+    }
+    return this.model.find(filterQuery, { __v: 0 });
   }
 
   async create(createModelData: unknown): Promise<T> {
-    const model = new this.model(createModelData, { __v: 0 });
-    return model.save();
+    const model = new this.model(createModelData);
+    return await model.save();
   }
 
   async findOneAndUpdate(
-    filterQuery: FilterQuery<T>,
+    filterQuery: FilterQuery<T> = {},
     updateModelData: UpdateQuery<unknown>,
   ): Promise<T | null> {
     return this.model.findOneAndUpdate(filterQuery, updateModelData, {

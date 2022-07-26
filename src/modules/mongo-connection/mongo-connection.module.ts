@@ -5,10 +5,6 @@ import { MongooseModule } from '@nestjs/mongoose';
 @Global()
 @Module({
   imports: [
-    ConfigModule.forRoot({
-      envFilePath: `./env/${process.env.NODE_ENV}.env`,
-      isGlobal: true,
-    }),
     MongooseModule.forRootAsync({
       imports: [ConfigModule],
       inject: [ConfigService],

@@ -6,10 +6,10 @@ import { ConfigModule } from 'src/modules/config/config.module';
 
 @Module({
   imports: [
+    ConfigModule,
     MongoConnectionModule,
     PermissionsModule,
     RolesModule,
-    ConfigModule,
   ],
   controllers: [],
   providers: [],

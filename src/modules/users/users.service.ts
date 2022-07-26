@@ -10,6 +10,8 @@ import { Permission } from 'src/modules/permissions/schemas/permission.schema';
 import { UserRoleDto } from 'src/modules/users/dto/user-role.dto';
 import { Logger } from 'src/common/decorators/logger.decorator';
 import { UsersRepository } from './users.repository';
+import { User } from './schemas/user.schema';
+import { Role } from '../roles/schemas/role.schema';
 
 @Injectable()
 export class UsersService {
@@ -21,7 +23,7 @@ export class UsersService {
   ) {}
 
   async findUserByEmail(email: string) {
-    return this.usersRepository.findOne({ email: email.toLowerCase() });
+    return this.usersRepository.findUserByEmailAndPopulate(email.toLowerCase());
   }
 
   async findUserByUserCode(userCode: number) {
@@ -29,16 +31,16 @@ export class UsersService {
   }
 
   async createUser(userDto: UserDto) {
-    const userExists = await this.findUserByEmail(userDto.email);
+    const userExists = (await this.findUserByEmail(userDto.email)) as User;
 
     if (userExists)
       throw new ConflictException(
         `User with email ${userDto.email} already exists`,
       );
     if (userDto.role) {
-      const roleExists = await this.rolesService.findRoleByName(
+      const roleExists = (await this.rolesService.findRoleByName(
         userDto.role.name,
-      );
+      )) as Role;
       if (!roleExists)
         throw new ConflictException(`Role ${userDto.role} does not exist`);
 
@@ -53,32 +55,11 @@ export class UsersService {
   }
 
   async getUsers() {
-    // popular referencias anidadas user -> role[] -> permission[]
-    // path: nombre del campo en el UserSchema
-    // model: nombre de la clase asociada, segun como esta registrada en ele modulo
-    const populate = {
-      path: 'role',
-      populate: {
-        path: 'permissions',
-        model: Permission.name,
-      },
-    };
-    const users = (await this.usersRepository.find({})) as any;
-    return users.populate(populate);
+    return this.usersRepository.getUsersWithRolesAndPopulate();
   }
 
   async getUsersDeleted() {
-    const populate = {
-      path: 'role',
-      populate: {
-        path: 'permissions',
-        model: Permission.name,
-      },
-    };
-    const deletedUsers = (await this.usersRepository.find({
-      deleted: true,
-    })) as any;
-    return deletedUsers.populate(populate);
+    return this.usersRepository.getUsersWithRolesAndPopulate({ deleted: true });
   }
 
   async updateUser(userDto: UserDto) {
@@ -178,11 +159,11 @@ export class UsersService {
     return this.findUserByUserCode(userCode);
   }
 
-  // para usar en RolesService
   @Logger()
   async countUsersWithRole(roleName: string): Promise<number> {
     roleName = roleName.toUpperCase();
-    const res = await this.usersRepository.getUsersWithRoles(roleName);
+    const res: { count: number }[] =
+      await this.usersRepository.getUsersWithRoles(roleName);
     if (res.length) return res[0].count;
     return 0;
   }

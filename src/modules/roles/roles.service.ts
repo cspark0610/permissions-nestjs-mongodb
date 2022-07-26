@@ -9,13 +9,12 @@ import { RoleDto } from 'src/modules/roles/dto/role.dto';
 import { PermissionInterface } from 'src/modules/permissions/interfaces/permission.interface';
 import { PermissionDto } from 'src/modules/permissions/dto/permission.dto';
 import { UsersService } from 'src/modules/users/users.service';
-import { UsersRepository } from 'src/modules/users/users.repository';
 import { RolesRepository } from 'src/modules/roles/roles.repository';
+import { Role } from './schemas/role.schema';
 
 @Injectable()
 export class RolesService {
   constructor(
-    private usersRepository: UsersRepository,
     private rolesRepository: RolesRepository,
     private permissionsService: PermissionsService,
     @Inject(forwardRef(() => UsersService))
@@ -24,13 +23,16 @@ export class RolesService {
 
   async findRoleByName(name: string) {
     name = name.toUpperCase();
-    return (await this.usersRepository.findOne({ name })).populate<{
-      permissions: PermissionInterface[];
-    }>('permissions');
+    const res = this.rolesRepository.findOne({ name }, 'permissions');
+    return res;
   }
 
-  async createRole(roleDto: RoleDto) {
-    const roleExists = await this.findRoleByName(roleDto.name);
+  async createRole(roleDto: RoleDto): Promise<Role> {
+    const roleExists = await this.rolesRepository.findOne(
+      { name: roleDto.name },
+      'permissions',
+    );
+
     if (roleExists)
       throw new ConflictException(`Role con nombre ${roleDto.name} ya existe`);
 
@@ -49,16 +51,17 @@ export class RolesService {
       }
       roleDto.permissions = permissionsRole;
     }
-    const role = await this.rolesRepository.create(roleDto);
-    return role.populate('permissions');
+    return this.rolesRepository.create(roleDto);
   }
 
   async getRoles(name: string) {
     const filterObj = {};
     name ? (filterObj['name'] = { $regex: name, $options: 'i' }) : {};
-    return (this.rolesRepository.find(filterObj) as any).populate(
+    const result: Promise<Role[]> = this.rolesRepository.find(
+      filterObj,
       'permissions',
     );
+    return result;
   }
 
   async updateRole(name: string, roleDto: RoleDto) {
@@ -88,8 +91,7 @@ export class RolesService {
         roleDto.permissions = permissionsRole;
       }
       await roleExists.updateOne(roleDto);
-      const roleUpdated = await this.rolesRepository.findById(roleExists._id);
-      return roleUpdated.populate('permissions');
+      return this.rolesRepository.findById(roleExists._id, 'permissions');
     } else {
       // creamos el role
       const roleCreated = await this.createRole(roleDto);
@@ -98,7 +100,11 @@ export class RolesService {
   }
 
   async addPermission(name: string, permissionDto: PermissionDto) {
-    const roleExists = await this.findRoleByName(name);
+    const roleExists = await this.rolesRepository.findOne(
+      { name },
+      'permissions',
+    );
+
     if (!roleExists)
       throw new ConflictException(`Role con nombre ${name} no existe`);
     // comprobar que el permiso ya existe
@@ -109,7 +115,7 @@ export class RolesService {
     if (!permissionExists)
       throw new ConflictException(`Permiso ${permissionDto.name} no existe`);
 
-    const permissionsArray: PermissionInterface[] = roleExists.permissions;
+    const permissionsArray = roleExists.permissions;
     const permissionRoleExists = permissionsArray.find(
       (p) => p.name == permissionDto.name,
     );

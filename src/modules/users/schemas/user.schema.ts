@@ -1,5 +1,5 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { ObjectId, Types } from 'mongoose';
+import { Types } from 'mongoose';
 import { Role } from 'src/modules/roles/schemas/role.schema';
 import { UserInterface } from 'src/modules/users/interfaces/user.interface';
 import { Document } from 'mongoose';
@@ -19,8 +19,8 @@ export class User extends Document implements UserInterface {
   @Prop({ type: Date })
   birthday: Date;
 
-  @Prop({ type: Types.ObjectId, ref: Role.name, default: null, nullable: true })
-  role?: ObjectId;
+  @Prop([{ type: Types.ObjectId, ref: 'Role' }])
+  role?: Role;
 
   @Prop({ type: Boolean, default: false })
   deleted: boolean;
