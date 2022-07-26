@@ -32,7 +32,7 @@ export abstract class BaseRepository<T extends Document> {
   }
 
   async create(createModelData: unknown): Promise<T> {
-    const model = new this.model(createModelData);
+    const model = new this.model(createModelData, { __v: 0 });
     return model.save();
   }
 
@@ -42,15 +42,16 @@ export abstract class BaseRepository<T extends Document> {
   ): Promise<T | null> {
     return this.model.findOneAndUpdate(filterQuery, updateModelData, {
       new: true,
+      __v: 0,
     });
   }
 
   async findOneAndDelete(filterQuery: FilterQuery<T>): Promise<T | null> {
-    return this.model.findOneAndDelete(filterQuery);
+    return this.model.findOneAndDelete(filterQuery, { __v: 0 });
   }
 
   async deleteMany(filterQuery: FilterQuery<T>): Promise<boolean> {
-    const deleteResult = await this.model.deleteMany(filterQuery);
+    const deleteResult = await this.model.deleteMany(filterQuery, { __v: 0 });
     return deleteResult.deletedCount >= 1;
   }
 }
