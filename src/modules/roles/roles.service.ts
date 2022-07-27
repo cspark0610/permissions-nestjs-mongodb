@@ -11,6 +11,7 @@ import { PermissionDto } from 'src/modules/permissions/dto/permission.dto';
 import { UsersService } from 'src/modules/users/users.service';
 import { RolesRepository } from 'src/modules/roles/roles.repository';
 import { Role } from './schemas/role.schema';
+import { Permission } from '../permissions/schemas/permission.schema';
 
 @Injectable()
 export class RolesService {
@@ -23,34 +24,27 @@ export class RolesService {
 
   async findRoleByName(name: string) {
     name = name.toUpperCase();
-    const res = this.rolesRepository.findOne({ name }, 'permissions');
-    return res;
+    return this.rolesRepository.findOne({ name }, 'permissions');
   }
 
   async createRole(roleDto: RoleDto): Promise<Role> {
-    const roleExists = await this.rolesRepository.findOne(
-      { name: roleDto.name },
-      'permissions',
-    );
-
-    if (roleExists)
-      throw new ConflictException(`Role con nombre ${roleDto.name} ya existe`);
+    const role = await this.findRoleByName(roleDto.name);
+    if (role)
+      throw new ConflictException(
+        `Role con nombre ${roleDto.name} ya fue creado`,
+      );
 
     if (!roleDto.permissions) {
       roleDto.permissions = [];
-    } else {
-      const permissionsRole: PermissionInterface[] = [];
-      for (const permission of roleDto.permissions) {
-        const p = await this.permissionsService.findPermissionByName(
-          permission.name,
-        );
-        if (!p) {
-          throw new ConflictException(`Permiso ${permission.name} no existe`);
-        }
-        permissionsRole.push(p);
-      }
-      roleDto.permissions = permissionsRole;
     }
+    const permissionsRole: PermissionInterface[] = [];
+    for (const permission of roleDto.permissions) {
+      const newP = await this.permissionsService.createPermission({
+        name: permission.name,
+      });
+      permissionsRole.push(newP);
+    }
+    roleDto.permissions = permissionsRole;
     return this.rolesRepository.create(roleDto);
   }
 
@@ -65,94 +59,62 @@ export class RolesService {
   }
 
   async updateRole(name: string, roleDto: RoleDto) {
-    const roleExists = await this.findRoleByName(name);
-    if (roleExists) {
-      const newRoleExists = await this.findRoleByName(roleDto.name);
-
-      if (newRoleExists && newRoleExists.name !== name) {
-        throw new ConflictException(
-          `Role con nombre ${roleDto.name} ya existe`,
-        );
-      }
-
-      if (!roleDto.permissions) {
-        roleDto.permissions = [];
-      } else {
-        const permissionsRole: PermissionInterface[] = [];
-        for (const permission of roleDto.permissions) {
-          const p = await this.permissionsService.findPermissionByName(
-            permission.name,
-          );
-          if (!p) {
-            throw new ConflictException(`Permiso ${permission.name} no existe`);
-          }
-          permissionsRole.push(p);
-        }
-        roleDto.permissions = permissionsRole;
-      }
-      await roleExists.updateOne(roleDto);
-      return this.rolesRepository.findById(roleExists._id, 'permissions');
-    } else {
-      // creamos el role
-      const roleCreated = await this.createRole(roleDto);
-      return roleCreated;
+    const roleToUpdate = await this.findRoleByName(name);
+    if (!roleToUpdate) {
+      throw new ConflictException(
+        `Role con nombre ${name} no existe para actualizar`,
+      );
     }
+    if (!roleDto.permissions) {
+      roleDto.permissions = [];
+    }
+
+    const permissionsRole: PermissionInterface[] = [];
+    for (const permission of roleDto.permissions) {
+      permissionsRole.push(permission);
+    }
+    roleDto.permissions = permissionsRole;
+
+    return this.rolesRepository.findOneAndUpdate({ name }, roleDto);
   }
 
   async addPermission(name: string, permissionDto: PermissionDto) {
-    const roleExists = await this.rolesRepository.findOne(
-      { name },
-      'permissions',
-    );
-
+    const roleExists = await this.findRoleByName(name);
     if (!roleExists)
       throw new ConflictException(`Role con nombre ${name} no existe`);
-    // comprobar que el permiso ya existe
-    const permissionExists = await this.permissionsService.findPermissionByName(
-      permissionDto.name,
-    );
-    // si no existe el permiso lanzar excepcion
-    if (!permissionExists)
-      throw new ConflictException(`Permiso ${permissionDto.name} no existe`);
 
-    const permissionsArray = roleExists.permissions;
-    const permissionRoleExists = permissionsArray.find(
-      (p) => p.name == permissionDto.name,
+    // comprobar que el permiso ya existe o no en el array de Permission del rol sobre el cual quiero agregarlo
+    const permissionRoleExists = roleExists.permissions.filter(
+      (permission) => permission.name == permissionDto.name,
     );
-    if (permissionRoleExists)
+
+    if (permissionRoleExists.length)
       throw new ConflictException(
         `El permiso ${permissionDto.name} ya existe en el role ${roleExists.name}`,
       );
-
-    // si no existe significa que lo puedo agregar
-    roleExists.permissions.push(permissionRoleExists);
-    return this.updateRole(name, roleExists);
+    // si no existe significa que lo puedo agregar el PermissionDto
+    roleExists.permissions.push(permissionDto as Permission);
+    await roleExists.save();
+    return roleExists;
   }
 
   async removePermission(name: string, permissionDto: PermissionDto) {
     const roleExists = await this.findRoleByName(name);
     if (!roleExists)
       throw new ConflictException(`Role con nombre ${name} no existe`);
-    // comprobar que el permiso ya existe
-    const permissionExists = await this.permissionsService.findPermissionByName(
-      permissionDto.name,
-    );
-    // si no existe el permiso lanzar excepcion
-    if (!permissionExists)
-      throw new ConflictException(`Permiso ${permissionDto.name} no existe`);
 
-    const permissionsArray: PermissionInterface[] = roleExists.permissions;
     // busco el index del permiso a borrar
-    const idxPermissionRoleExists: number = permissionsArray.findIndex(
+    const idxPermissionRoleExists: number = roleExists.permissions.findIndex(
       (p) => p.name == permissionDto.name,
     );
     if (idxPermissionRoleExists === -1)
       throw new ConflictException(
-        `El permiso ${permissionDto.name} ya existe en el role ${roleExists.name}`,
+        `El permiso ${permissionDto.name} NO existe en el role ${roleExists.name} para ser borrado`,
       );
     // si el index es distinto de -1 significa que lo puedo borrar del array
     roleExists.permissions.splice(idxPermissionRoleExists, 1);
-    return this.updateRole(name, roleExists);
+    await roleExists.save();
+    return roleExists;
   }
 
   /**

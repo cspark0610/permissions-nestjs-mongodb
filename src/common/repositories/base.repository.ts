@@ -1,8 +1,6 @@
 import { Document, FilterQuery, Model, UpdateQuery } from 'mongoose';
 import mongoose from 'mongoose';
 mongoose.Promise = require('bluebird');
-import { AppException } from '../exceptions/appException';
-import { HttpStatus } from '@nestjs/common';
 
 export abstract class BaseRepository<T extends Document> {
   constructor(protected readonly model: Model<T>) {}
@@ -13,13 +11,6 @@ export abstract class BaseRepository<T extends Document> {
         .findOne(filterQuery, { __v: 0 })
         .populate(path)
         .exec();
-      if (!res) {
-        throw new AppException({
-          error: 'No se encontró el registro',
-          errorCode: 'NOT_FOUND',
-          statusCode: HttpStatus.NOT_FOUND,
-        });
-      }
       return res;
     }
     return this.model.findOne(filterQuery);
@@ -33,13 +24,6 @@ export abstract class BaseRepository<T extends Document> {
         })
         .populate(path)
         .exec();
-      if (!res) {
-        throw new AppException({
-          error: 'No se encontró el registro',
-          errorCode: 'NOT_FOUND',
-          statusCode: HttpStatus.NOT_FOUND,
-        });
-      }
       return res;
     }
     return this.model.findById(id, { __v: 0 });
@@ -54,9 +38,6 @@ export abstract class BaseRepository<T extends Document> {
         .find(filterQuery, { __v: 0 })
         .populate(path)
         .exec();
-      if (!res) {
-        throw new Error('No se encontró el registro');
-      }
       return res;
     }
     return this.model.find(filterQuery, { __v: 0 });
@@ -65,6 +46,10 @@ export abstract class BaseRepository<T extends Document> {
   async create(createModelData: unknown): Promise<T> {
     const model = new this.model(createModelData);
     return await model.save();
+  }
+
+  async insertMany(array: unknown) {
+    return this.model.insertMany(array);
   }
 
   async findOneAndUpdate(

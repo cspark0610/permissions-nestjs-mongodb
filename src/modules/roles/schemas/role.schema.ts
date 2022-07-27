@@ -9,7 +9,7 @@ export class Role extends Document implements RoleInterface {
   @Prop({ unique: true, type: String, uppercase: true })
   name: string;
 
-  @Prop([{ type: Types.ObjectId, ref: 'Permisssion' }])
+  @Prop({ type: [Types.ObjectId], ref: 'Permission' })
   permissions: Permission[];
 }
 

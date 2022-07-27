@@ -10,8 +10,6 @@ import { Permission } from 'src/modules/permissions/schemas/permission.schema';
 import { UserRoleDto } from 'src/modules/users/dto/user-role.dto';
 import { Logger } from 'src/common/decorators/logger.decorator';
 import { UsersRepository } from './users.repository';
-import { User } from './schemas/user.schema';
-import { Role } from '../roles/schemas/role.schema';
 
 @Injectable()
 export class UsersService {
@@ -31,16 +29,15 @@ export class UsersService {
   }
 
   async createUser(userDto: UserDto) {
-    const userExists = (await this.findUserByEmail(userDto.email)) as User;
-
+    const userExists = await this.findUserByEmail(userDto.email);
     if (userExists)
       throw new ConflictException(
         `User with email ${userDto.email} already exists`,
       );
     if (userDto.role) {
-      const roleExists = (await this.rolesService.findRoleByName(
+      const roleExists = await this.rolesService.findRoleByName(
         userDto.role.name,
-      )) as Role;
+      );
       if (!roleExists)
         throw new ConflictException(`Role ${userDto.role} does not exist`);
 

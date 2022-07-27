@@ -28,10 +28,7 @@ export class UsersRepository extends BaseRepository<User> {
   async getUsersWithRolesAndPopulate(
     filterObj: { [key: string]: any } = {},
   ): Promise<User[]> {
-    return this.userModel
-      .find(filterObj)
-      .populate(this.usersPopulateObj)
-      .exec();
+    return this.userModel.find(filterObj).populate(this.usersPopulateObj);
   }
 
   async countDocuments(): Promise<number> {
