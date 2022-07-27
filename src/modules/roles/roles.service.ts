@@ -38,6 +38,7 @@ export class RolesService {
       roleDto.permissions = [];
     }
     const permissionsRole: PermissionInterface[] = [];
+
     for (const permission of roleDto.permissions) {
       const newP = await this.permissionsService.createPermission({
         name: permission.name,

@@ -15,8 +15,8 @@ export class PermissionsService {
   async createPermission(
     permissionDto: PermissionDto,
   ): Promise<PermissionInterface> {
-    const exists = await this.findPermissionByName(permissionDto.name);
-    if (exists) throw new ConflictException('Permission already exists');
+    // const exists = await this.findPermissionByName(permissionDto.name);
+    // if (exists) throw new ConflictException('Permission already exists');
     return this.permissionsRepository.create(permissionDto);
   }
 

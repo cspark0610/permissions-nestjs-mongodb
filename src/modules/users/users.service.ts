@@ -6,7 +6,6 @@ import {
 } from '@nestjs/common';
 import { RolesService } from 'src/modules/roles/roles.service';
 import { UserDto } from 'src/modules/users/dto/user.dto';
-import { Permission } from 'src/modules/permissions/schemas/permission.schema';
 import { UserRoleDto } from 'src/modules/users/dto/user-role.dto';
 import { Logger } from 'src/common/decorators/logger.decorator';
 import { UsersRepository } from './users.repository';
@@ -25,7 +24,7 @@ export class UsersService {
   }
 
   async findUserByUserCode(userCode: number) {
-    return this.usersRepository.findOne({ userCode });
+    return this.usersRepository.findUserByUserCodeAndPopulate(userCode);
   }
 
   async createUser(userDto: UserDto) {
@@ -85,28 +84,23 @@ export class UsersService {
         `User ${userRoleDto.userCode} does not exist`,
       );
 
+    // solamente se puede asignar un rol a un usuario
     if (userExists.role)
       throw new ConflictException(
         `User ${userRoleDto.userCode} already has a role`,
       );
 
-    const roleExists = await this.rolesService.findRoleByName(
+    const roleFound = await this.rolesService.findRoleByName(
       userRoleDto.roleName,
     );
-    if (!roleExists)
+    if (!roleFound)
       throw new ConflictException(
         `Role ${userRoleDto.roleName} does not exist`,
       );
     // en este punto el role existe y se actualiza al userExists con el rol encontrado
-    await userExists.updateOne({ role: roleExists });
+    await userExists.updateOne({ role: roleFound });
     const updatedUser = await this.findUserByUserCode(userRoleDto.userCode);
-    return updatedUser.populate({
-      path: 'role',
-      populate: {
-        path: 'permissions',
-        model: Permission.name,
-      },
-    });
+    return updatedUser;
   }
 
   async removeRole(userCode: number) {

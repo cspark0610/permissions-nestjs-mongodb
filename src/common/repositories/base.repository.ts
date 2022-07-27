@@ -48,8 +48,8 @@ export abstract class BaseRepository<T extends Document> {
     return await model.save();
   }
 
-  async insertMany(array: unknown) {
-    return this.model.insertMany(array);
+  async update(updateModelData: { [P in keyof T]: any }) {
+    return this.model.updateOne(updateModelData, { __v: 0 });
   }
 
   async findOneAndUpdate(

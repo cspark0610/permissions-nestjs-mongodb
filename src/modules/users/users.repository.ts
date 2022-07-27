@@ -25,6 +25,10 @@ export class UsersRepository extends BaseRepository<User> {
     return this.userModel.findOne({ email }).populate(this.usersPopulateObj);
   }
 
+  async findUserByUserCodeAndPopulate(userCode: number) {
+    return this.userModel.findOne({ userCode }).populate(this.usersPopulateObj);
+  }
+
   async getUsersWithRolesAndPopulate(
     filterObj: { [key: string]: any } = {},
   ): Promise<User[]> {

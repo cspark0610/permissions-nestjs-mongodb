@@ -19,7 +19,7 @@ export class User extends Document implements UserInterface {
   @Prop({ type: Date })
   birthday: Date;
 
-  @Prop({ type: Types.ObjectId, ref: 'Role' })
+  @Prop({ type: Types.ObjectId, ref: 'Role' }) // significa en DB solo voy a guardar una referencia al modelo de Role
   role?: Role;
 
   @Prop({ type: Boolean, default: false })
