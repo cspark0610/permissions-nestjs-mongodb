@@ -1,4 +1,4 @@
-import { Document, FilterQuery, Model, UpdateQuery } from 'mongoose';
+import { Document, FilterQuery, Model, Types, UpdateQuery } from 'mongoose';
 import mongoose from 'mongoose';
 mongoose.Promise = require('bluebird');
 
@@ -43,9 +43,15 @@ export abstract class BaseRepository<T extends Document> {
     return this.model.find(filterQuery, { __v: 0 });
   }
 
-  async create(createModelData: unknown): Promise<T> {
-    const model = new this.model(createModelData);
-    return await model.save();
+  async create(createModelData: Omit<T, '_id'>): Promise<T> {
+    // const model = new this.model(createModelData);
+    // return await model.save();
+
+    const createdDocument = new this.model({
+      ...createModelData,
+      _id: new Types.ObjectId(),
+    });
+    return (await createdDocument.save()).toJSON() as unknown as T;
   }
 
   async update(updateModelData: { [P in keyof T]: any }) {
@@ -58,6 +64,7 @@ export abstract class BaseRepository<T extends Document> {
   ): Promise<T | null> {
     return this.model.findOneAndUpdate(filterQuery, updateModelData, {
       new: true,
+      lean: true,
       __v: 0,
     });
   }
