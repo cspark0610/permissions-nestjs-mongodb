@@ -1,4 +1,5 @@
-import { Document, FilterQuery, Model, Types, UpdateQuery } from 'mongoose';
+import { Document, FilterQuery, Model, Types } from 'mongoose';
+//import { UpdateQuery } from 'mongoose';
 import mongoose from 'mongoose';
 mongoose.Promise = require('bluebird');
 
@@ -8,7 +9,7 @@ export abstract class BaseRepository<T extends Document> {
   async findOne(filterQuery: FilterQuery<T>, path?: string | string[]) {
     if (path) {
       const res = await this.model
-        .findOne(filterQuery, { __v: 0 })
+        .findOne(filterQuery, { __v: 0 }, { lean: true })
         .populate(path)
         .exec();
       return res;
@@ -19,9 +20,7 @@ export abstract class BaseRepository<T extends Document> {
   async findById(id: string, path?: string | string[]) {
     if (path) {
       const res = await this.model
-        .findById(id, {
-          __v: 0,
-        })
+        .findById(id, { __v: 0 }, { lean: true })
         .populate(path)
         .exec();
       return res;
@@ -35,12 +34,12 @@ export abstract class BaseRepository<T extends Document> {
   ): Promise<T[] | null> {
     if (path) {
       const res = await this.model
-        .find(filterQuery, { __v: 0 })
+        .find(filterQuery, { __v: 0 }, { lean: true })
         .populate(path)
         .exec();
       return res;
     }
-    return this.model.find(filterQuery, { __v: 0 });
+    return this.model.find(filterQuery, { __v: 0 }, { lean: true });
   }
 
   async create(createModelData: Omit<T, '_id'>): Promise<T> {
@@ -60,7 +59,7 @@ export abstract class BaseRepository<T extends Document> {
 
   async findOneAndUpdate(
     filterQuery: FilterQuery<T> = {},
-    updateModelData: UpdateQuery<unknown>,
+    updateModelData: Partial<T>,
   ): Promise<T | null> {
     return this.model.findOneAndUpdate(filterQuery, updateModelData, {
       new: true,

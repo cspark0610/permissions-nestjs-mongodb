@@ -7,6 +7,7 @@ import {
   SaveOptions,
   Connection,
   SchemaTypes,
+  ClientSession,
 } from 'mongoose';
 import { Prop, Schema } from '@nestjs/mongoose';
 
@@ -80,7 +81,7 @@ export abstract class AbstractRepository<TDocument extends AbstractDocument> {
     return this.model.find(filterQuery, {}, { lean: true });
   }
 
-  async startTransaction() {
+  async startTransaction(): Promise<ClientSession> {
     const session = await this.connection.startSession();
     session.startTransaction();
     return session;
